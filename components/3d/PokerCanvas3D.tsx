@@ -117,12 +117,22 @@ export const PokerCanvas3D: React.FC<PokerCanvas3DProps> = ({ room, mySeatIndex 
           );
         })()}
 
-        {/* Center Pot Chips */}
-        {room.pot > 0 && (
-          <group position={[0, 0.1, -0.6]}>
-            <ChipStack3D amount={room.pot} />
-          </group>
-        )}
+        {/* Center Pot Chips (Positioned neatly north of community cards relative to viewer) */}
+        {room.pot > 0 && (() => {
+          const userSeatAngle = mySeatIndex !== -1 ? (mySeatIndex * Math.PI * 2) / 6 - Math.PI / 2 : -Math.PI / 2;
+          // Normal vector pointing away from player across the table (into the center-north of cards)
+          const dirAwayX = -Math.cos(userSeatAngle);
+          const dirAwayZ = -Math.sin(userSeatAngle);
+          // Place pot chips 0.85 units further back behind the community cards
+          const potX = dirAwayX * 0.95;
+          const potZ = dirAwayZ * 0.95;
+
+          return (
+            <group position={[potX, 0.08, potZ]}>
+              <ChipStack3D amount={room.pot} />
+            </group>
+          );
+        })()}
 
         {/* 6 Seats & Cute Cat Players */}
         {room.players.map((player, idx) => (

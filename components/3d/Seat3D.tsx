@@ -276,7 +276,7 @@ export const Seat3D: React.FC<Seat3DProps> = ({
           <group position={[-0.2, 0, 0]} rotation={[0, 0, -0.1]}>
             <AnimatedCard
               card={player.cards[0]}
-              isFaceDown={player.cards.length === 2 && !player.cards[0]?.rank}
+              isFaceDown={!player.cards[0]?.rank || (player.cards[0] as any).rank === '?'}
               scale={0.65}
               targetPos={[0, 0, 0]}
               targetRot={[0, 0, 0]}
@@ -286,7 +286,7 @@ export const Seat3D: React.FC<Seat3DProps> = ({
           <group position={[0.2, 0, 0.01]} rotation={[0, 0, 0.1]}>
             <AnimatedCard
               card={player.cards[1]}
-              isFaceDown={player.cards.length === 2 && !player.cards[1]?.rank}
+              isFaceDown={!player.cards[1]?.rank || (player.cards[1] as any).rank === '?'}
               scale={0.65}
               targetPos={[0, 0, 0]}
               targetRot={[0, 0, 0]}

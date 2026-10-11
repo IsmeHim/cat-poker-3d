@@ -29,6 +29,7 @@ export interface Player {
   isSmallBlind: boolean;
   isBigBlind: boolean;
   disconnected: boolean;
+  shownCardIndices?: number[]; // indices of cards player chose to voluntarily reveal (e.g. [0], [1], [0, 1])
 }
 
 export interface Pot {
@@ -74,6 +75,8 @@ export interface ClientToServerEvents {
   ) => void;
   'leave-room': () => void;
   'start-game': () => void;
+  'stop-game': () => void;
+  'show-cards': (data: { cardIndices: number[] }) => void;
   'player-action': (action: { type: PlayerActionType; amount?: number }) => void;
   'reconnect-player': (
     data: { roomCode: string; playerId: string },

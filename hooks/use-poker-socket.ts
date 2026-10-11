@@ -16,6 +16,8 @@ export interface UsePokerSocketReturn {
   joinRoom: (roomCode: string, playerName: string, seatIndex: number) => Promise<boolean>;
   leaveRoom: () => void;
   startGame: () => void;
+  stopGame: () => void;
+  showCards: (cardIndices: number[]) => void;
   sendAction: (type: PlayerActionType, amount?: number) => void;
   sendChatMessage: (message: string) => void;
 }
@@ -149,6 +151,21 @@ export function usePokerSocket(): UsePokerSocketReturn {
     }
   }, [socket]);
 
+  const stopGame = useCallback(() => {
+    if (socket) {
+      socket.emit('stop-game');
+    }
+  }, [socket]);
+
+  const showCards = useCallback(
+    (cardIndices: number[]) => {
+      if (socket) {
+        socket.emit('show-cards', { cardIndices });
+      }
+    },
+    [socket]
+  );
+
   const sendAction = useCallback(
     (type: PlayerActionType, amount?: number) => {
       if (socket) {
@@ -181,6 +198,8 @@ export function usePokerSocket(): UsePokerSocketReturn {
     joinRoom,
     leaveRoom,
     startGame,
+    stopGame,
+    showCards,
     sendAction,
     sendChatMessage,
   };

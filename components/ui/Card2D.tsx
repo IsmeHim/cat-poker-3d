@@ -51,7 +51,7 @@ export const Card2D: React.FC<Card2DProps> = ({ card, isFaceDown = false, classN
   if (isFaceDown || !card) {
     return (
       <div
-        className={`w-20 h-28 sm:w-24 sm:h-36 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-400 p-1.5 shadow-xl border-2 border-white/80 flex items-center justify-center transition-transform hover:-translate-y-2 select-none ${className}`}
+        className={`w-20 h-28 sm:w-24 sm:h-36 rounded-2xl bg-linear-to-tr from-pink-500 to-rose-400 p-1.5 shadow-xl border-2 border-white/80 flex items-center justify-center transition-transform hover:-translate-y-2 select-none ${className}`}
       >
         <div className="w-full h-full rounded-xl border-2 border-pink-200/50 flex flex-col items-center justify-center bg-pink-600/30">
           <span className="text-3xl filter drop-shadow">🐾</span>

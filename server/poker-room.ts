@@ -646,8 +646,44 @@ export class PokerRoom {
     }
   }
 
+  public stopGame(requestingPlayerId: string): boolean {
+    if (this.state.hostPlayerId !== requestingPlayerId) {
+      return false;
+    }
+    this.clearTurnTimer();
+    if (this.nextHandTimeout) clearTimeout(this.nextHandTimeout);
+    this.state.stage = 'idle';
+    this.state.gameStarted = false;
+    this.state.activeTurnIndex = -1;
+    this.state.communityCards = [];
+    this.state.pot = 0;
+    this.state.winners = null;
+    for (const p of this.state.players) {
+      if (p) {
+        p.cards = [];
+        p.currentBet = 0;
+        p.totalRoundBet = 0;
+        p.hasFolded = false;
+        p.lastAction = undefined;
+        p.shownCardIndices = undefined;
+      }
+    }
+    this.logHistory('🛑 Room Host stopped the game.');
+    this.broadcastState();
+    return true;
+  }
+
+  public showCards(playerId: string, cardIndices: number[]) {
+    const player = this.getPlayerById(playerId);
+    if (!player || !player.cards || player.cards.length < 2) return;
+    player.shownCardIndices = cardIndices;
+    const cardStr = cardIndices.map((i) => `${player.cards![i]?.rank}${player.cards![i]?.suit}`).join(' & ');
+    this.logHistory(`👀 ${player.name} showed: ${cardStr}`);
+    this.broadcastState(this.state.stage === 'showdown');
+  }
+
   /**
-   * Broadcast state. In poker, clients must NOT see opponents' hole cards unless it's showdown.
+   * Broadcast state. In poker, clients must NOT see opponents' hole cards unless it's showdown or voluntarily shown.
    */
   public broadcastState(revealCards: boolean = false) {
     // For each socket, customize the view
@@ -665,10 +701,17 @@ export class PokerRoom {
         if (revealAll || p.id === forPlayerId) {
           return { ...p };
         }
-        // Mask other players' cards
+        // If player has voluntarily shown cards (or during showdown)
+        const maskedCards: Card[] = (p.cards || []).map((c, idx) => {
+          if (p.shownCardIndices && p.shownCardIndices.includes(idx)) {
+            return c; // Reveal this specific card
+          }
+          return { rank: '?', suit: 's' } as unknown as Card; // Face down card representation
+        });
+
         return {
           ...p,
-          cards: p.cards && p.cards.length > 0 ? [ { rank: 'A', suit: 's' } as Card, { rank: 'A', suit: 's' } as Card ] : [], // Card back representation
+          cards: maskedCards,
         };
       }),
     };

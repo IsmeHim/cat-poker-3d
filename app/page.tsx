@@ -27,6 +27,8 @@ export default function GamePage() {
     joinRoom,
     leaveRoom,
     startGame,
+    stopGame,
+    showCards,
     sendAction,
     sendChatMessage,
   } = usePokerSocket();
@@ -50,6 +52,8 @@ export default function GamePage() {
         chatMessages={chatMessages}
         onAction={sendAction}
         onStartGame={startGame}
+        onStopGame={stopGame}
+        onShowCards={showCards}
         onLeaveRoom={leaveRoom}
         onSendChat={sendChatMessage}
       />

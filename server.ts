@@ -119,6 +119,22 @@ app.prepare().then(() => {
       }
     });
 
+    socket.on('stop-game', () => {
+      if (!currentRoomCode || !currentPlayerId) return;
+      const room = rooms.get(currentRoomCode);
+      if (room) {
+        room.stopGame(currentPlayerId);
+      }
+    });
+
+    socket.on('show-cards', ({ cardIndices }) => {
+      if (!currentRoomCode || !currentPlayerId) return;
+      const room = rooms.get(currentRoomCode);
+      if (room) {
+        room.showCards(currentPlayerId, cardIndices);
+      }
+    });
+
     socket.on('player-action', (action) => {
       if (!currentRoomCode || !currentPlayerId) return;
       const room = rooms.get(currentRoomCode);
