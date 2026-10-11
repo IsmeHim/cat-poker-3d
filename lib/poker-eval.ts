@@ -80,3 +80,18 @@ export function evaluateHands(
     allEvaluations,
   };
 }
+
+/**
+ * Evaluates a player's current best hand in real time (e.g. Pair of Kings, Flush)
+ */
+export function evaluatePlayerHand(holeCards: Card[], communityCards: Card[]): string {
+  if (!holeCards || holeCards.length < 2) return '';
+  const cards = [...holeCards, ...communityCards].map(cardToString);
+  if (cards.length < 2) return '';
+  try {
+    const solved = Hand.solve(cards);
+    return solved?.descr || '';
+  } catch (err) {
+    return '';
+  }
+}

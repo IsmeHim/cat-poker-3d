@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { RoomState, PlayerActionType } from '@/lib/types';
 import { Card2D } from './Card2D';
-import { Copy, Volume2, Users, Send, Check, MessageSquare } from 'lucide-react';
+import { evaluatePlayerHand } from '@/lib/poker-eval';
+import { Copy, Volume2, Users, Send, Check, MessageSquare, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface PokerHUDProps {
@@ -37,6 +38,13 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
 
   const myPlayer = mySeatIndex !== -1 ? room.players[mySeatIndex] : null;
   const isMyTurn = room.activeTurnIndex === mySeatIndex && myPlayer && !myPlayer.hasFolded;
+  const activePlayer = room.activeTurnIndex !== -1 ? room.players[room.activeTurnIndex] : null;
+
+  // Real-time evaluation of player's hand rank (e.g. Pair of Kings, Flush)
+  const currentHandName = React.useMemo(() => {
+    if (!myPlayer || !myPlayer.cards || myPlayer.cards.length < 2) return '';
+    return evaluatePlayerHand(myPlayer.cards, room.communityCards || []);
+  }, [myPlayer?.cards, room.communityCards]);
 
   // Sound / Confetti on winner
   useEffect(() => {
@@ -100,13 +108,27 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
           </div>
         </div>
 
-        {/* Center Game Stage & Pot Banner */}
-        <div className="flex flex-col items-center">
+        {/* Center Game Stage, Pot Banner & Active Player Countdown */}
+        <div className="flex flex-col items-center gap-1.5">
           <div className="bg-gradient-to-r from-pink-500 to-rose-400 text-white font-black px-6 py-1.5 rounded-full shadow-lg border-2 border-white flex items-center gap-2">
             <span className="text-xs uppercase tracking-widest">{room.stage}</span>
             <span className="text-pink-200">|</span>
             <span className="text-sm">POT: 🪙 {room.pot}</span>
           </div>
+
+          {/* Turn Indicator for everyone */}
+          {room.stage !== 'idle' && activePlayer && (
+            <div className={`px-4 py-1 rounded-full text-xs font-black shadow-md border flex items-center gap-2 transition-all ${
+              isMyTurn
+                ? 'bg-rose-500 text-white border-white animate-pulse'
+                : 'bg-white/95 text-slate-700 border-pink-200'
+            }`}>
+              <Clock size={13} className={isMyTurn ? 'animate-spin' : 'text-pink-500'} />
+              <span>
+                {isMyTurn ? 'Your Turn!' : `${activePlayer.name}'s Turn`} ({timer}s)
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Action Controls & Top Menu */}
@@ -221,48 +243,60 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
         </div>
       )}
 
-      {/* ================= BOTTOM BAR: HOLE CARDS & ACTIONS ================= */}
-      <div className="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-4 pointer-events-auto mt-auto">
-        {/* Player Profile & Balance */}
-        {myPlayer && (
-          <div className="bg-white/90 backdrop-blur-md p-3.5 rounded-3xl shadow-xl border border-pink-200 flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-400 to-rose-300 flex items-center justify-center text-2xl shadow-md">
-              🐱
-            </div>
-            <div>
-              <div className="font-black text-slate-800 text-sm flex items-center gap-1.5">
-                <span>{myPlayer.name}</span>
-                <span className="text-[10px] bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded-full font-bold">
-                  Seat {myPlayer.seatIndex + 1}
-                </span>
+      {/* ================= BOTTOM BAR: COMMUNITY (LEFT), HOLE CARDS & HAND RANK (CENTER), ACTIONS (RIGHT) ================= */}
+      <div className="flex flex-col sm:flex-row items-end sm:items-end justify-between gap-4 pointer-events-auto mt-auto">
+        {/* Left Side: Player Profile, Balance & 5 Community Cards */}
+        <div className="flex flex-col gap-2">
+          {/* Player Profile & Balance */}
+          {myPlayer && (
+            <div className="bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-pink-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-400 to-rose-300 flex items-center justify-center text-xl shadow-md">
+                🐱
               </div>
-              <div className="text-amber-500 font-extrabold text-base flex items-center gap-1">
-                <span>🪙 {myPlayer.chips}</span>
+              <div>
+                <div className="font-black text-slate-800 text-xs flex items-center gap-1.5">
+                  <span>{myPlayer.name}</span>
+                  <span className="text-[10px] bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded-full font-bold">
+                    Seat {myPlayer.seatIndex + 1}
+                  </span>
+                </div>
+                <div className="text-amber-500 font-extrabold text-sm flex items-center gap-1">
+                  <span>🪙 {myPlayer.chips}</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Bottom Cards Area: Community Cards + Hole Cards */}
-        <div className="flex flex-col items-center gap-2">
-          {/* 5 Community Cards Displayed Clearly at Bottom */}
+          {/* 5 Community Cards Displayed on Left Side */}
           {room.communityCards && room.communityCards.length > 0 && (
-            <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl shadow-lg border border-pink-200 flex items-center gap-2 animate-fadeIn">
-              <span className="text-[11px] font-black text-pink-500 uppercase tracking-wider mr-1 hidden sm:inline">
-                Community:
+            <div className="bg-white/90 backdrop-blur-md px-3 py-2 rounded-2xl shadow-xl border border-pink-200 flex flex-col gap-1 animate-fadeIn">
+              <span className="text-[10px] font-black text-pink-500 uppercase tracking-wider flex items-center gap-1">
+                <span>🎴 Community Cards</span>
               </span>
               <div className="flex items-center gap-1.5">
                 {room.communityCards.map((c, i) => (
                   <div key={i} className="transform transition hover:-translate-y-1">
-                    <Card2D card={c} isPeekable={false} />
+                    <Card2D card={c} isPeekable={false} className="!w-12 !h-18 sm:!w-14 sm:!h-20" />
                   </div>
                 ))}
               </div>
             </div>
           )}
+        </div>
 
-          {/* Player's 2 Hole Cards with Hover Peek */}
-          {myPlayer && myPlayer.cards && myPlayer.cards.length > 0 && !myPlayer.hasFolded && (
+        {/* Center: Player's Hole Cards & Real-Time Best Hand Ranking */}
+        {myPlayer && myPlayer.cards && myPlayer.cards.length > 0 && !myPlayer.hasFolded && (
+          <div className="flex flex-col items-center gap-2">
+            {/* Real-Time Hand Name Badge (e.g. 1 Pair, Three of a Kind, Flush) */}
+            {currentHandName && (
+              <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black text-xs px-4 py-1.5 rounded-full shadow-lg border-2 border-white flex items-center gap-1.5 animate-bounce">
+                <span>✨</span>
+                <span>{currentHandName}</span>
+                <span>🐾</span>
+              </div>
+            )}
+
+            {/* 2 Hole Cards */}
             <div className="flex items-center gap-3">
               <div className="relative group">
                 <Card2D card={myPlayer.cards[0]} isPeekable />
@@ -273,8 +307,8 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
                 <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-pink-600 bg-white/80 px-1.5 rounded-full opacity-0 group-hover:opacity-100 transition">Card 2</span>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Action Controls & Turn Countdown */}
         {myPlayer && (

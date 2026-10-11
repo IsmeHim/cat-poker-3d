@@ -49,24 +49,37 @@ export const PokerCanvas3D: React.FC<PokerCanvas3DProps> = ({ room, mySeatIndex 
         {/* Table Felt, Rim & Engravings */}
         <PokerTable3D />
 
-        {/* Center Community Cards (Flop, Turn, River) with Dealing Animation & Crisp Tilt */}
-        <group position={[0, 0.1, 0.2]}>
-          {room.communityCards.map((card, idx) => {
-            const spacing = 0.8;
-            const posX = (idx - 2) * spacing;
-            // Slight tilt towards the seated player so it is super easy and clear to read
-            return (
-              <AnimatedCard
-                key={`${card.rank}-${card.suit}-${idx}`}
-                card={card}
-                targetPos={[posX, 0.01 * idx, 0]}
-                targetRot={[-Math.PI / 2.35, 0, (idx % 2 === 0 ? 0.02 : -0.02)]}
-                scale={1.05}
-                delayIndex={idx}
-              />
-            );
-          })}
-        </group>
+        {/* Center Community Cards (Flop, Turn, River) with Dealing Animation - Flat on table facing current player */}
+        {(() => {
+          // Calculate angle so cards are always facing the user's seat directly and flat on table felt
+          const userSeatAngle = mySeatIndex !== -1 ? (mySeatIndex * Math.PI * 2) / 6 - Math.PI / 2 : -Math.PI / 2;
+          // Perpendicular tangent vector for placing cards side-by-side relative to user's view
+          const tangentX = -Math.sin(userSeatAngle);
+          const tangentZ = Math.cos(userSeatAngle);
+
+          return (
+            <group position={[0, 0.08, 0]}>
+              {room.communityCards.map((card, idx) => {
+                const spacing = 0.76;
+                const offset = (idx - 2) * spacing;
+                const posX = tangentX * offset;
+                const posZ = tangentZ * offset;
+                const rotY = -userSeatAngle - Math.PI / 2;
+
+                return (
+                  <AnimatedCard
+                    key={`${card.rank}-${card.suit}-${idx}`}
+                    card={card}
+                    targetPos={[posX, 0.005 * idx, posZ]}
+                    targetRot={[-Math.PI / 2, 0, rotY]}
+                    scale={0.92}
+                    delayIndex={idx}
+                  />
+                );
+              })}
+            </group>
+          );
+        })()}
 
         {/* Center Pot Chips */}
         {room.pot > 0 && (

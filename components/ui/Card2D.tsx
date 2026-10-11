@@ -62,10 +62,10 @@ export const Card2D: React.FC<Card2DProps> = ({ card, isFaceDown = false, classN
         )}
       </div>
 
-      {/* Bottom Right Rank (Inverted) */}
-      <div className="flex flex-col items-end leading-none rotate-180" style={{ color }}>
-        <span className="text-lg sm:text-xl font-black">{rank}</span>
+      {/* Bottom Right Rank (Upright and clean) */}
+      <div className="flex flex-col items-end leading-none" style={{ color }}>
         <span className="text-sm sm:text-base">{symbol}</span>
+        <span className="text-lg sm:text-xl font-black">{rank}</span>
       </div>
     </div>
   );

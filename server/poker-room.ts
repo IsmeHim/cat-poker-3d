@@ -161,11 +161,32 @@ export class PokerRoom {
     if (seatIndex !== -1) {
       const p = this.state.players[seatIndex];
       this.state.players[seatIndex] = null;
+
+      // Remove from socket map
+      for (const [sId, pId] of this.socketToPlayerMap.entries()) {
+        if (pId === playerId) {
+          this.socketToPlayerMap.delete(sId);
+        }
+      }
+
       this.logHistory(`👋 ${p?.name || 'Player'} left the table.`);
-      if (this.state.activeTurnIndex === seatIndex) {
+
+      const remainingPlayers = this.state.players.filter((player) => player !== null && !player.disconnected);
+
+      if (remainingPlayers.length < 2 && this.state.stage !== 'idle') {
+        // Not enough players to continue, award pot to remaining or reset
+        this.clearTurnTimer();
+        if (remainingPlayers.length === 1) {
+          this.handleSingleWinner(remainingPlayers[0]!);
+        } else {
+          this.state.stage = 'idle';
+          this.state.gameStarted = false;
+          this.state.activeTurnIndex = -1;
+        }
+      } else if (this.state.activeTurnIndex === seatIndex && this.state.stage !== 'idle') {
         this.nextTurn();
       }
-      this.checkRoundCompletion();
+
       this.broadcastState();
     }
   }

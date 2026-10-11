@@ -88,14 +88,14 @@ export function createCardCanvasTexture(card: Card, isBack: boolean = false): HT
   ctx.font = '48px serif';
   ctx.fillText(suitSymbol, 30, 115);
 
-  // Bottom Right Rank & Suit (Inverted)
+  // Bottom Right Rank & Suit (Upright for easy readability)
   ctx.save();
-  ctx.translate(484, 652);
-  ctx.rotate(Math.PI);
+  ctx.fillStyle = suitColor;
+  ctx.textAlign = 'right';
   ctx.font = 'bold 54px "Arial Rounded MT Bold", "Nunito", sans-serif';
-  ctx.fillText(rankDisplay, 0, 0);
+  ctx.fillText(rankDisplay, 484, 680);
   ctx.font = '48px serif';
-  ctx.fillText(suitSymbol, 2, 50);
+  ctx.fillText(suitSymbol, 484, 624);
   ctx.restore();
 
   // Center Art
