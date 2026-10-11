@@ -93,41 +93,41 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-3 sm:p-5 select-none font-sans z-10">
       {/* ================= TOP BAR ================= */}
-      <div className="flex items-center justify-between pointer-events-auto">
+      <div className="flex flex-wrap items-center justify-between gap-2 pointer-events-auto w-full">
         {/* Room Code Badge */}
-        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-pink-200">
-          <span className="text-xl">🐱</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-white/90 backdrop-blur-md px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl shadow-lg border border-pink-200">
+          <span className="text-base sm:text-xl">🐱</span>
           <div>
-            <div className="text-[10px] uppercase tracking-wider font-extrabold text-pink-500">Room Code</div>
-            <div className="text-base font-black text-slate-800 tracking-wider flex items-center gap-2">
+            <div className="text-[9px] uppercase tracking-wider font-extrabold text-pink-500">Room</div>
+            <div className="text-xs sm:text-base font-black text-slate-800 tracking-wider flex items-center gap-1">
               <span>{room.roomCode}</span>
               <button
                 onClick={copyRoomCode}
-                className="p-1 hover:bg-pink-100 rounded-lg text-pink-600 transition-colors"
+                className="p-0.5 sm:p-1 hover:bg-pink-100 rounded-lg text-pink-600 transition-colors"
                 title="Copy code"
               >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? <Check size={14} /> : <Copy size={14} />}
               </button>
             </div>
           </div>
         </div>
 
         {/* Center Game Stage, Pot Banner & Active Player Countdown */}
-        <div className="flex flex-col items-center gap-1.5">
-          <div className="bg-gradient-to-r from-pink-500 to-rose-400 text-white font-black px-6 py-1.5 rounded-full shadow-lg border-2 border-white flex items-center gap-2">
-            <span className="text-xs uppercase tracking-widest">{room.stage}</span>
+        <div className="flex flex-col items-center gap-1 order-last sm:order-none w-full sm:w-auto mt-1 sm:mt-0">
+          <div className="bg-gradient-to-r from-pink-500 to-rose-400 text-white font-black px-4 sm:px-6 py-1 sm:py-1.5 rounded-full shadow-lg border-2 border-white flex items-center gap-2 text-xs sm:text-sm">
+            <span className="text-[10px] sm:text-xs uppercase tracking-widest">{room.stage}</span>
             <span className="text-pink-200">|</span>
-            <span className="text-sm">POT: 🪙 {room.pot}</span>
+            <span>POT: 🪙 {room.pot}</span>
           </div>
 
           {/* Turn Indicator for everyone */}
           {room.stage !== 'idle' && activePlayer && (
-            <div className={`px-4 py-1 rounded-full text-xs font-black shadow-md border flex items-center gap-2 transition-all ${
+            <div className={`px-3 py-0.5 sm:px-4 sm:py-1 rounded-full text-[10px] sm:text-xs font-black shadow-md border flex items-center gap-1.5 transition-all ${
               isMyTurn
                 ? 'bg-rose-500 text-white border-white animate-pulse'
                 : 'bg-white/95 text-slate-700 border-pink-200'
             }`}>
-              <Clock size={13} className={isMyTurn ? 'animate-spin' : 'text-pink-500'} />
+              <Clock size={12} className={isMyTurn ? 'animate-spin' : 'text-pink-500'} />
               <span>
                 {isMyTurn ? 'Your Turn!' : `${activePlayer.name}'s Turn`} ({timer}s)
               </span>
@@ -135,37 +135,38 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
           )}
         </div>
 
-        {/* Action Controls & Top Menu */}
-        <div className="flex items-center gap-2">
+        {/* Action Controls & Top Menu (Always accessible on Mobile) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto sm:ml-0">
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className="bg-white/90 backdrop-blur-md p-2.5 rounded-2xl shadow-md border border-pink-200 hover:bg-pink-50 text-slate-700 transition"
+            className="bg-white/90 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl shadow-md border border-pink-200 hover:bg-pink-50 text-slate-700 transition"
             title="Hand History"
           >
             📜
           </button>
           <button
             onClick={() => setShowChat(!showChat)}
-            className="relative bg-white/90 backdrop-blur-md p-2.5 rounded-2xl shadow-md border border-pink-200 hover:bg-pink-50 text-slate-700 transition"
+            className="relative bg-white/90 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl shadow-md border border-pink-200 hover:bg-pink-50 text-slate-700 transition"
             title="Chat"
           >
-            <MessageSquare size={18} />
+            <MessageSquare size={16} />
           </button>
           {room.hostPlayerId === myPlayerId && room.stage !== 'idle' && onStopGame && (
             <button
               onClick={onStopGame}
-              className="bg-amber-100 hover:bg-amber-200 text-amber-800 font-black px-3 py-2 rounded-2xl text-xs transition border border-amber-300 flex items-center gap-1 shadow-sm"
+              className="bg-amber-100 hover:bg-amber-200 text-amber-800 font-black px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl text-[11px] sm:text-xs transition border border-amber-300 flex items-center gap-1 shadow-sm active:scale-95"
               title="Stop Game (Host)"
             >
               <span>🛑</span>
-              <span>Stop Game</span>
+              <span className="hidden sm:inline">Stop</span>
             </button>
           )}
+          {/* Leave Button - High contrast, clearly visible on all mobile screens */}
           <button
             onClick={onLeaveRoom}
-            className="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-2 rounded-2xl text-xs transition border border-rose-200"
+            className="bg-rose-500 hover:bg-rose-600 text-white font-black px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-xs transition shadow-md active:scale-95 border border-rose-400"
           >
-            Leave
+            Leave 🚪
           </button>
         </div>
       </div>
@@ -344,25 +345,25 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
               </div>
             </div>
 
-            {/* Voluntary Show Cards Buttons (Show 1, Show 2, Show Both) */}
-            {onShowCards && (
-              <div className="flex items-center gap-1 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-full shadow border border-pink-200 text-[9px] sm:text-[10px] font-black">
-                <span className="text-slate-500 mr-0.5">Show:</span>
+            {/* Voluntary Show Cards Buttons - ONLY shown when winning by fold (end of hand) */}
+            {onShowCards && room.winners && room.winners.some((w) => w.playerId === myPlayerId) && (
+              <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border-2 border-pink-300 text-[11px] font-black animate-pulse">
+                <span className="text-pink-600 mr-0.5">Show bluff:</span>
                 <button
                   onClick={() => onShowCards([0])}
-                  className="px-2 py-0.5 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-lg transition"
+                  className="px-2.5 py-1 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-xl transition shadow-sm"
                 >
                   Card 1
                 </button>
                 <button
                   onClick={() => onShowCards([1])}
-                  className="px-2 py-0.5 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-lg transition"
+                  className="px-2.5 py-1 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-xl transition shadow-sm"
                 >
                   Card 2
                 </button>
                 <button
                   onClick={() => onShowCards([0, 1])}
-                  className="px-2 py-0.5 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition shadow-sm"
+                  className="px-2.5 py-1 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white rounded-xl transition shadow-sm"
                 >
                   Both 🎴
                 </button>

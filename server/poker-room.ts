@@ -587,11 +587,12 @@ export class PokerRoom {
     ];
 
     this.logHistory(`🏆 ${winner.name} wins ${wonAmount} chips! (All others folded)`);
-    this.broadcastState(true);
+    // Mask cards by default unless the winner voluntarily clicks show
+    this.broadcastState(false);
 
     this.nextHandTimeout = setTimeout(() => {
       this.startNewHand();
-    }, 4500);
+    }, 6500);
   }
 
   private handleShowdown() {
