@@ -230,16 +230,30 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
       {room.stage === 'idle' && (
         <div className="self-center pointer-events-auto bg-white/95 backdrop-blur-md p-6 rounded-3xl shadow-2xl border-2 border-pink-200 text-center max-w-md">
           <div className="text-3xl mb-2">🐾</div>
-          <h2 className="text-xl font-black text-slate-800 mb-1">Waiting for Players</h2>
+          <h2 className="text-xl font-black text-slate-800 mb-1">
+            {room.players.filter((p) => p !== null).length < 2 ? 'Waiting for More Players' : 'Ready to Start!'}
+          </h2>
           <p className="text-xs text-slate-500 mb-4">
-            Seat at least 2 players to start Texas Hold&apos;em!
+            {room.players.filter((p) => p !== null).length < 2
+              ? `Waiting for a friend to join Room: ${room.roomCode}`
+              : room.hostPlayerId === myPlayerId
+                ? 'You are the Room Host. Click below to deal the cards!'
+                : 'Waiting for the Room Host to start the game...'}
           </p>
-          <button
-            onClick={onStartGame}
-            className="w-full bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white font-black py-3 rounded-2xl shadow-lg shadow-pink-300/50 transition transform active:scale-95"
-          >
-            Start Dealing Now! 🎴
-          </button>
+
+          {room.hostPlayerId === myPlayerId ? (
+            <button
+              disabled={room.players.filter((p) => p !== null).length < 2}
+              onClick={onStartGame}
+              className="w-full bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white font-black py-3 rounded-2xl shadow-lg shadow-pink-300/50 transition transform active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Start Dealing Now! 🎴
+            </button>
+          ) : (
+            <div className="bg-pink-50 text-pink-700 text-xs font-bold py-2.5 px-4 rounded-xl border border-pink-200">
+              Host will start the game soon ⏳
+            </div>
+          )}
         </div>
       )}
 

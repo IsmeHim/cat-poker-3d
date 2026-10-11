@@ -81,6 +81,42 @@ export const PokerCanvas3D: React.FC<PokerCanvas3DProps> = ({ room, mySeatIndex 
           );
         })()}
 
+        {/* 1st Person Player's Hole Cards on Table with Realistic Staggered Dealing Animation */}
+        {(() => {
+          if (mySeatIndex === -1) return null;
+          const myPlayer = room.players[mySeatIndex];
+          if (!myPlayer || !myPlayer.cards || myPlayer.cards.length === 0 || myPlayer.hasFolded) return null;
+
+          const userSeatAngle = (mySeatIndex * Math.PI * 2) / 6 - Math.PI / 2;
+          const tangentX = -Math.sin(userSeatAngle);
+          const tangentZ = Math.cos(userSeatAngle);
+          // Position right in front of player on felt (radius 2.5)
+          const inFrontX = Math.cos(userSeatAngle) * 2.5;
+          const inFrontZ = Math.sin(userSeatAngle) * 2.5;
+          const rotY = -userSeatAngle - Math.PI / 2;
+
+          return (
+            <group position={[inFrontX, 0.08, inFrontZ]}>
+              {/* Card 1 - Dealt first */}
+              <AnimatedCard
+                card={myPlayer.cards[0]}
+                targetPos={[-tangentX * 0.4, 0, -tangentZ * 0.4]}
+                targetRot={[-Math.PI / 2, 0, rotY - 0.08]}
+                scale={0.88}
+                delayIndex={mySeatIndex * 0.3}
+              />
+              {/* Card 2 - Dealt second with suspense delay */}
+              <AnimatedCard
+                card={myPlayer.cards[1]}
+                targetPos={[tangentX * 0.4, 0.005, tangentZ * 0.4]}
+                targetRot={[-Math.PI / 2, 0, rotY + 0.08]}
+                scale={0.88}
+                delayIndex={mySeatIndex * 0.3 + 0.65}
+              />
+            </group>
+          );
+        })()}
+
         {/* Center Pot Chips */}
         {room.pot > 0 && (
           <group position={[0, 0.1, -0.6]}>

@@ -63,6 +63,7 @@ export interface RoomState {
   winners: WinnerResult[] | null;
   handHistory: string[];
   gameStarted: boolean;
+  hostPlayerId: string;
 }
 
 // Client-to-Server Events

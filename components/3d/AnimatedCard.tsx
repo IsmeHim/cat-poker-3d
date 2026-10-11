@@ -47,14 +47,14 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
       return;
     }
 
-    progressRef.current = Math.min(1, progressRef.current + delta * 2.8);
+    progressRef.current = Math.min(1, progressRef.current + delta * 1.6);
     // Smooth easeOutCubic
     const t = 1 - Math.pow(1 - progressRef.current, 3);
 
     // Position interpolation with an arc
     const currX = THREE.MathUtils.lerp(startPos.current.x, targetPos[0], t);
     const currZ = THREE.MathUtils.lerp(startPos.current.z, targetPos[2], t);
-    const arcHeight = Math.sin(t * Math.PI) * 0.45;
+    const arcHeight = Math.sin(t * Math.PI) * 0.35;
     const currY = THREE.MathUtils.lerp(startPos.current.y, targetPos[1], t) + arcHeight;
 
     groupRef.current.position.set(currX, currY, currZ);

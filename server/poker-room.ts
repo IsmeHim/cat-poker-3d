@@ -37,6 +37,7 @@ export class PokerRoom {
       winners: null,
       handHistory: [`Room ${roomCode} created. Welcome to Cat Poker 3D! 🐾`],
       gameStarted: false,
+      hostPlayerId: '',
     };
   }
 
@@ -106,15 +107,15 @@ export class PokerRoom {
 
     this.state.players[seatIndex] = newPlayer;
     this.socketToPlayerMap.set(socketId, playerId);
+
+    // If no host assigned, this player becomes the room host
+    if (!this.state.hostPlayerId) {
+      this.state.hostPlayerId = playerId;
+    }
+
     this.logHistory(`🐱 ${newPlayer.name} joined Seat ${seatIndex + 1}`);
 
     this.broadcastState();
-
-    // If game has not started and we have at least 2 players, can auto-start or wait for host
-    const seatedCount = this.state.players.filter((p) => p !== null).length;
-    if (seatedCount >= 2 && !this.state.gameStarted && this.state.stage === 'idle') {
-      this.startNewHand();
-    }
 
     return { success: true };
   }
@@ -170,6 +171,12 @@ export class PokerRoom {
       }
 
       this.logHistory(`👋 ${p?.name || 'Player'} left the table.`);
+
+      // If host left, assign host to first remaining player
+      if (this.state.hostPlayerId === playerId) {
+        const nextHost = this.state.players.find((player) => player !== null && !player.disconnected);
+        this.state.hostPlayerId = nextHost ? nextHost.id : '';
+      }
 
       const remainingPlayers = this.state.players.filter((player) => player !== null && !player.disconnected);
 

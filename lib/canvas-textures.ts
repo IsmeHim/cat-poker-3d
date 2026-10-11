@@ -10,7 +10,8 @@ export function getSuitSymbol(suit: Suit): string {
 }
 
 export function getSuitColor(suit: Suit): string {
-  return suit === 'h' || suit === 'd' ? '#ef4444' : '#1e293b';
+  // Bold vibrant red for Hearts/Diamonds, deep navy-slate for Spades/Clubs as in reference
+  return suit === 'h' || suit === 'd' ? '#e11d48' : '#1e3a47';
 }
 
 export function getRankDisplay(rank: Rank): string {
@@ -18,16 +19,80 @@ export function getRankDisplay(rank: Rank): string {
   return rank;
 }
 
-const CAT_FACES: Record<string, string> = {
-  J: '😸', // Grinning Cat
-  Q: '😻', // Heart Eyes Cat
-  K: '😼', // Smirking Cat King
-  A: '😽', // Kissing Angel Cat
-};
+/**
+ * Draw vector shapes for suits matching the modern flat poker card illustration
+ */
+export function drawSuitShape(
+  ctx: CanvasRenderingContext2D,
+  suit: Suit,
+  x: number,
+  y: number,
+  size: number,
+  color: string
+) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = color;
+
+  if (suit === 'h') {
+    // Curvy, bold cartoon heart
+    const s = size / 32;
+    ctx.beginPath();
+    ctx.moveTo(0, s * 11);
+    ctx.bezierCurveTo(0, s * 4, -s * 15, -s * 6, -s * 15, -s * 14);
+    ctx.bezierCurveTo(-s * 15, -s * 22, -s * 6, -s * 24, 0, -s * 14);
+    ctx.bezierCurveTo(s * 6, -s * 24, s * 15, -s * 22, s * 15, -s * 14);
+    ctx.bezierCurveTo(s * 15, -s * 6, 0, s * 4, 0, s * 11);
+    ctx.fill();
+  } else if (suit === 'd') {
+    // Sharp diamond
+    const s = size / 32;
+    ctx.beginPath();
+    ctx.moveTo(0, -s * 22);
+    ctx.lineTo(s * 16, 0);
+    ctx.lineTo(0, s * 22);
+    ctx.lineTo(-s * 16, 0);
+    ctx.closePath();
+    ctx.fill();
+  } else if (suit === 's') {
+    // Spade with stem
+    const s = size / 32;
+    ctx.beginPath();
+    ctx.moveTo(0, -s * 20);
+    ctx.bezierCurveTo(-s * 6, -s * 6, -s * 17, 0, -s * 17, s * 10);
+    ctx.bezierCurveTo(-s * 17, s * 16, -s * 10, s * 18, -s * 3, s * 14);
+    ctx.lineTo(-s * 4, s * 20);
+    ctx.lineTo(s * 4, s * 20);
+    ctx.lineTo(s * 3, s * 14);
+    ctx.bezierCurveTo(s * 10, s * 18, s * 17, s * 16, s * 17, s * 10);
+    ctx.bezierCurveTo(s * 17, 0, s * 6, -s * 6, 0, -s * 20);
+    ctx.fill();
+  } else if (suit === 'c') {
+    // Club with 3 lobes and stem
+    const s = size / 32;
+    ctx.beginPath();
+    // Top circle
+    ctx.arc(0, -s * 9, s * 8, 0, Math.PI * 2);
+    // Left circle
+    ctx.arc(-s * 8, s * 4, s * 8, 0, Math.PI * 2);
+    // Right circle
+    ctx.arc(s * 8, s * 4, s * 8, 0, Math.PI * 2);
+    ctx.fill();
+    // Stem
+    ctx.beginPath();
+    ctx.moveTo(0, s * 2);
+    ctx.lineTo(-s * 5, s * 20);
+    ctx.lineTo(s * 5, s * 20);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
 
 /**
  * Creates an HTML5 Canvas texture for a playing card.
- * Generates high-res cute pastel cartoon styling with cat drawings on royal cards.
+ * Generates ultra-clean vector casino card aesthetics matching reference image.
  */
 export function createCardCanvasTexture(card: Card, isBack: boolean = false): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
@@ -39,96 +104,85 @@ export function createCardCanvasTexture(card: Card, isBack: boolean = false): HT
   // Scale context to use 512x716 logical coordinates
   ctx.scale(2, 2);
 
-  // Background
-  const radius = 32;
+  // Smooth crisp card background with round corners
+  const radius = 38;
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
   ctx.roundRect(4, 4, 504, 708, radius);
   ctx.fill();
 
-  // Subtle pastel border
-  ctx.lineWidth = 10;
-  ctx.strokeStyle = '#fbcfe8'; // soft pink border
+  // Subtle clean border
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = '#e2e8f0';
   ctx.stroke();
 
   if (isBack) {
     // Cozy cute paw pattern back
-    ctx.fillStyle = '#ec4899'; // Cozy strawberry pink
+    ctx.fillStyle = '#f43f5e'; // vibrant rose red
     ctx.beginPath();
-    ctx.roundRect(16, 16, 480, 684, 24);
+    ctx.roundRect(18, 18, 476, 680, 28);
     ctx.fill();
 
     // Inner patterned frame
-    ctx.strokeStyle = '#fdf2f8';
+    ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 6;
     ctx.stroke();
 
     // Center Big Cat Paw
-    drawCatPaw(ctx, 256, 358, '#fdf2f8', 1.8);
+    drawCatPaw(ctx, 256, 358, '#ffffff', 2.0);
 
     // Decorative corner paws
-    drawCatPaw(ctx, 60, 60, '#fbcfe8', 0.6);
-    drawCatPaw(ctx, 452, 60, '#fbcfe8', 0.6);
-    drawCatPaw(ctx, 60, 656, '#fbcfe8', 0.6);
-    drawCatPaw(ctx, 452, 656, '#fbcfe8', 0.6);
+    drawCatPaw(ctx, 70, 70, 'rgba(255, 255, 255, 0.7)', 0.7);
+    drawCatPaw(ctx, 442, 70, 'rgba(255, 255, 255, 0.7)', 0.7);
+    drawCatPaw(ctx, 70, 646, 'rgba(255, 255, 255, 0.7)', 0.7);
+    drawCatPaw(ctx, 442, 646, 'rgba(255, 255, 255, 0.7)', 0.7);
 
     return canvas;
   }
 
   // Front Face
   const suitColor = getSuitColor(card.suit);
-  const suitSymbol = getSuitSymbol(card.suit);
   const rankDisplay = getRankDisplay(card.rank);
 
-  // Top Left Rank & Suit
+  // Top Left: Bold Clean Font (like reference image)
   ctx.fillStyle = suitColor;
-  ctx.font = 'bold 54px "Arial Rounded MT Bold", "Nunito", sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(rankDisplay, 28, 64);
-  ctx.font = '48px serif';
-  ctx.fillText(suitSymbol, 30, 115);
+  ctx.font = '900 68px "Arial Black", "Impact", "Montserrat", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(rankDisplay, 58, 86);
+  // Top Left Suit right below rank
+  drawSuitShape(ctx, card.suit, 58, 142, 42, suitColor);
 
-  // Bottom Right Rank & Suit (Upright for easy readability)
+  // Bottom Right: Inverted matching reference card deck standard
   ctx.save();
-  ctx.fillStyle = suitColor;
-  ctx.textAlign = 'right';
-  ctx.font = 'bold 54px "Arial Rounded MT Bold", "Nunito", sans-serif';
-  ctx.fillText(rankDisplay, 484, 680);
-  ctx.font = '48px serif';
-  ctx.fillText(suitSymbol, 484, 624);
+  ctx.translate(454, 630);
+  ctx.rotate(Math.PI);
+  ctx.font = '900 68px "Arial Black", "Impact", "Montserrat", sans-serif';
+  ctx.fillText(rankDisplay, 0, -22);
+  drawSuitShape(ctx, card.suit, 0, 36, 42, suitColor);
   ctx.restore();
 
-  // Center Art
-  const isRoyal = ['J', 'Q', 'K', 'A'].includes(card.rank);
+  // Center Art: Giant bold suit illustration (like the large Heart in the reference card)
+  const isRoyal = ['J', 'Q', 'K'].includes(card.rank);
   if (isRoyal) {
-    // Cute Cat Character inside pastel circle
-    ctx.fillStyle = '#fff1f2';
+    // Royal cat face with suit accent
+    ctx.fillStyle = '#f8fafc';
     ctx.beginPath();
-    ctx.arc(256, 358, 140, 0, Math.PI * 2);
+    ctx.arc(256, 358, 145, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#f43f5e';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 6;
     ctx.stroke();
 
-    const catEmoji = CAT_FACES[card.rank] || '🐱';
-    ctx.font = '130px sans-serif';
+    drawSuitShape(ctx, card.suit, 256, 275, 75, suitColor);
+
+    const royalEmojis: Record<string, string> = { J: '😸', Q: '😻', K: '😼' };
+    ctx.font = '110px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(catEmoji, 256, 350);
-
-    ctx.fillStyle = suitColor;
-    ctx.font = '36px "Arial Rounded MT Bold", sans-serif';
-    ctx.fillText(`${rankDisplay} ${suitSymbol}`, 256, 460);
+    ctx.fillText(royalEmojis[card.rank] || '🐱', 256, 395);
   } else {
-    // Number Card: Center suit with mini cat paw inside
-    ctx.fillStyle = suitColor;
-    ctx.font = '160px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(suitSymbol, 256, 358);
-
-    // Cute decorative paw watermark
-    drawCatPaw(ctx, 256, 358, 'rgba(255, 255, 255, 0.45)', 1.0);
+    // For Ace and Number cards: Gorgeous giant center suit emblem (just like the big Heart in reference image)
+    drawSuitShape(ctx, card.suit, 256, 358, card.rank === 'A' ? 240 : 180, suitColor);
   }
 
   return canvas;
