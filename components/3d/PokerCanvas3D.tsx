@@ -8,6 +8,7 @@ import { PokerTable3D } from './PokerTable3D';
 import { Seat3D } from './Seat3D';
 import { TableCamera } from './TableCamera';
 import { Card3D } from './Card3D';
+import { AnimatedCard } from './AnimatedCard';
 import { ChipStack3D } from './Chip3D';
 
 interface PokerCanvas3DProps {
@@ -48,19 +49,21 @@ export const PokerCanvas3D: React.FC<PokerCanvas3DProps> = ({ room, mySeatIndex 
         {/* Table Felt, Rim & Engravings */}
         <PokerTable3D />
 
-        {/* Center Community Cards (Flop, Turn, River) */}
+        {/* Center Community Cards (Flop, Turn, River) with Dealing Animation & Crisp Tilt */}
         <group position={[0, 0.1, 0.2]}>
           {room.communityCards.map((card, idx) => {
-            const spacing = 0.75;
+            const spacing = 0.8;
             const posX = (idx - 2) * spacing;
+            // Slight tilt towards the seated player so it is super easy and clear to read
             return (
-              <group
-                key={idx}
-                position={[posX, 0.01 * idx, 0]}
-                rotation={[-Math.PI / 2, 0, (idx % 2 === 0 ? 0.02 : -0.02)]}
-              >
-                <Card3D card={card} scale={0.95} />
-              </group>
+              <AnimatedCard
+                key={`${card.rank}-${card.suit}-${idx}`}
+                card={card}
+                targetPos={[posX, 0.01 * idx, 0]}
+                targetRot={[-Math.PI / 2.35, 0, (idx % 2 === 0 ? 0.02 : -0.02)]}
+                scale={1.05}
+                delayIndex={idx}
+              />
             );
           })}
         </group>

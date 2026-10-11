@@ -2,7 +2,7 @@ import { RoomState, Player, Card, PlayerActionType, WinnerResult } from '../lib/
 import { createDeck, evaluateHands } from '../lib/poker-eval';
 import { Server as SocketIOServer } from 'socket.io';
 
-const TURN_TIME_LIMIT = 20; // 20s countdown
+const TURN_TIME_LIMIT = 30; // 30s countdown per turn
 const STARTING_CHIPS = 1000;
 const SMALL_BLIND = 10;
 const BIG_BLIND = 20;
@@ -58,9 +58,26 @@ export class PokerRoom {
       return { success: false, message: 'Invalid seat index (0-5)' };
     }
 
-    if (this.state.players[seatIndex] !== null) {
-      return { success: false, message: 'Seat already taken!' };
+    // If there is already 1 player in the room, prefer seating directly opposite (seat + 3 % 6)
+    const currentSeated = this.state.players.filter((p) => p !== null);
+    let targetSeat = seatIndex;
+    if (currentSeated.length === 1 && (this.state.players[seatIndex] !== null || seatIndex === 0)) {
+      const firstPlayerSeat = this.state.players.findIndex((p) => p !== null);
+      const oppositeSeat = (firstPlayerSeat + 3) % 6;
+      if (this.state.players[oppositeSeat] === null) {
+        targetSeat = oppositeSeat;
+      }
     }
+
+    if (this.state.players[targetSeat] !== null) {
+      // Find any first available seat
+      const freeSeat = this.state.players.findIndex((p) => p === null);
+      if (freeSeat === -1) {
+        return { success: false, message: 'Room is full!' };
+      }
+      targetSeat = freeSeat;
+    }
+    seatIndex = targetSeat;
 
     // Check if player is already seated in another seat
     const existingIndex = this.state.players.findIndex((p) => p?.id === playerId);

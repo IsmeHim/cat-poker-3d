@@ -46,9 +46,11 @@ export function usePokerSocket(): UsePokerSocketReturn {
   useEffect(() => {
     if (!myPlayerId) return;
 
-    // When behind reverse proxies like ngrok, polling-first ensures instant connection
-    // before upgrading to WebSocket, and prevents connection drops
-    const s: Socket<ServerToClientEvents, ClientToServerEvents> = io({
+    // If NEXT_PUBLIC_SOCKET_URL is set (e.g. deployed backend on Render/Railway), connect there.
+    // Otherwise connect to the current origin (local dev or unified server).
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
+
+    const s: Socket<ServerToClientEvents, ClientToServerEvents> = io(socketUrl as any, {
       autoConnect: true,
       transports: ['polling', 'websocket'],
       reconnectionAttempts: 10,

@@ -31,10 +31,13 @@ const CAT_FACES: Record<string, string> = {
  */
 export function createCardCanvasTexture(card: Card, isBack: boolean = false): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 716;
+  canvas.width = 1024;
+  canvas.height = 1432;
   const ctx = canvas.getContext('2d');
   if (!ctx) return canvas;
+
+  // Scale context to use 512x716 logical coordinates
+  ctx.scale(2, 2);
 
   // Background
   const radius = 32;

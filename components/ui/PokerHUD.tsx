@@ -243,13 +243,38 @@ export const PokerHUD: React.FC<PokerHUDProps> = ({
           </div>
         )}
 
-        {/* Player's 2 Hole Cards with Hover Peek */}
-        {myPlayer && myPlayer.cards && myPlayer.cards.length > 0 && !myPlayer.hasFolded && (
-          <div className="flex items-center gap-3">
-            <Card2D card={myPlayer.cards[0]} isPeekable />
-            <Card2D card={myPlayer.cards[1]} isPeekable />
-          </div>
-        )}
+        {/* Bottom Cards Area: Community Cards + Hole Cards */}
+        <div className="flex flex-col items-center gap-2">
+          {/* 5 Community Cards Displayed Clearly at Bottom */}
+          {room.communityCards && room.communityCards.length > 0 && (
+            <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl shadow-lg border border-pink-200 flex items-center gap-2 animate-fadeIn">
+              <span className="text-[11px] font-black text-pink-500 uppercase tracking-wider mr-1 hidden sm:inline">
+                Community:
+              </span>
+              <div className="flex items-center gap-1.5">
+                {room.communityCards.map((c, i) => (
+                  <div key={i} className="transform transition hover:-translate-y-1">
+                    <Card2D card={c} isPeekable={false} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Player's 2 Hole Cards with Hover Peek */}
+          {myPlayer && myPlayer.cards && myPlayer.cards.length > 0 && !myPlayer.hasFolded && (
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <Card2D card={myPlayer.cards[0]} isPeekable />
+                <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-pink-600 bg-white/80 px-1.5 rounded-full opacity-0 group-hover:opacity-100 transition">Card 1</span>
+              </div>
+              <div className="relative group">
+                <Card2D card={myPlayer.cards[1]} isPeekable />
+                <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-pink-600 bg-white/80 px-1.5 rounded-full opacity-0 group-hover:opacity-100 transition">Card 2</span>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Action Controls & Turn Countdown */}
         {myPlayer && (

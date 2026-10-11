@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { Player } from '@/lib/types';
 import { Card3D } from './Card3D';
+import { AnimatedCard } from './AnimatedCard';
 import { ChipStack3D } from './Chip3D';
 
 interface Seat3DProps {
@@ -208,9 +209,9 @@ export const Seat3D: React.FC<Seat3DProps> = ({
         </group>
       )}
 
-      {/* 3D Cat Character Model sitting at chair (Only for opponents) */}
+      {/* 3D Cat Character Model sitting at chair facing inwards to the table center */}
       {player && !isMySeat && (
-        <group position={[x, 0.45, z]} rotation={[0, -angle + Math.PI / 2, 0]}>
+        <group position={[x, 0.45, z]} rotation={[0, -angle - Math.PI / 2, 0]}>
           {/* Cat Body */}
           <mesh position={[0, 0, 0]} castShadow>
             <sphereGeometry args={[0.42, 24, 24]} />
@@ -231,7 +232,7 @@ export const Seat3D: React.FC<Seat3DProps> = ({
               <coneGeometry args={[0.14, 0.25, 4]} />
               <meshStandardMaterial color="#f472b6" roughness={0.4} />
             </mesh>
-            {/* Eyes */}
+            {/* Eyes (facing +Z in local space towards table) */}
             <mesh position={[-0.1, 0.05, 0.3]}>
               <sphereGeometry args={[0.04, 12, 12]} />
               <meshBasicMaterial color="#1e293b" />
@@ -269,14 +270,28 @@ export const Seat3D: React.FC<Seat3DProps> = ({
         </mesh>
       )}
 
-      {/* Opponent's Cards on Table (Hidden or Revealed) */}
+      {/* Opponent's Cards on Table with Dealing Animation (Hidden or Revealed) */}
       {player && !isMySeat && player.cards && player.cards.length > 0 && !player.hasFolded && (
         <group position={[cardX, 0.1, cardZ]} rotation={[-Math.PI / 2, 0, cardRotationY]}>
           <group position={[-0.2, 0, 0]} rotation={[0, 0, -0.1]}>
-            <Card3D card={player.cards[0]} isFaceDown={player.cards.length === 2 && !player.cards[0]?.rank} scale={0.65} />
+            <AnimatedCard
+              card={player.cards[0]}
+              isFaceDown={player.cards.length === 2 && !player.cards[0]?.rank}
+              scale={0.65}
+              targetPos={[0, 0, 0]}
+              targetRot={[0, 0, 0]}
+              delayIndex={seatIndex * 0.2}
+            />
           </group>
           <group position={[0.2, 0, 0.01]} rotation={[0, 0, 0.1]}>
-            <Card3D card={player.cards[1]} isFaceDown={player.cards.length === 2 && !player.cards[1]?.rank} scale={0.65} />
+            <AnimatedCard
+              card={player.cards[1]}
+              isFaceDown={player.cards.length === 2 && !player.cards[1]?.rank}
+              scale={0.65}
+              targetPos={[0, 0, 0]}
+              targetRot={[0, 0, 0]}
+              delayIndex={seatIndex * 0.2 + 0.1}
+            />
           </group>
         </group>
       )}

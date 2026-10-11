@@ -26,6 +26,10 @@ export const Card3D: React.FC<Card3DProps> = ({
     const canvas = createCardCanvasTexture(dummyCard, false);
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 16;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
     return tex;
   }, [card?.rank, card?.suit]);
 
@@ -34,6 +38,10 @@ export const Card3D: React.FC<Card3DProps> = ({
     const canvas = createCardCanvasTexture({ rank: 'A', suit: 's' }, true);
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 16;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
     return tex;
   }, []);
 
